@@ -1,12 +1,16 @@
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Scanner;
 
 public class Day1 {
     static Map<Character, String[]> map;
     static Map<String, Integer> toNum;
     
     public static void main(String[] args) throws FileNotFoundException {
+        long startTime = System.currentTimeMillis();
+        
         String file = "input/day1.txt";
         
         map = new HashMap<>() {{
@@ -32,6 +36,7 @@ public class Day1 {
         
         System.out.println("Part I  sum: " + getSum(new Scanner(new FileReader(file)), false));
         System.out.println("Part II sum: " + getSum(new Scanner(new FileReader(file)), true));
+        System.out.println("Execution time: " + (System.currentTimeMillis() - startTime) + "ms");
     }
     
     private static int getSum(Scanner in, boolean checkLetters) {

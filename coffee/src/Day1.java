@@ -3,19 +3,19 @@ import java.io.FileReader;
 import java.util.*;
 
 public class Day1 {
-    static Map<Character, Set<String>> map;
+    static Map<Character, String[]> map;
     static Map<String, Integer> toNum;
     
     public static void main(String[] args) throws FileNotFoundException {
         String file = "input/day1.txt";
         
         map = new HashMap<>() {{
-            put('o', new HashSet<>(List.of("one")));
-            put('t', new HashSet<>(List.of("two", "three")));
-            put('f', new HashSet<>(List.of("four", "five")));
-            put('s', new HashSet<>(List.of("six", "seven")));
-            put('e', new HashSet<>(List.of("eight")));
-            put('n', new HashSet<>(List.of("nine")));
+            put('o', new String[]{"one"});
+            put('t', new String[]{"two", "three"});
+            put('f', new String[]{"four", "five"});
+            put('s', new String[]{"six", "seven"});
+            put('e', new String[]{"eight"});
+            put('n', new String[]{"nine"});
         }};
         
         toNum = new HashMap<>() {{

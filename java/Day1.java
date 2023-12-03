@@ -1,27 +1,12 @@
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Scanner;
+import java.io.*;
+import java.util.*;
 
 public class Day1 {
-    static Map<Character, String[]> map;
     static Map<String, Integer> toNum;
     
     public static void main(String[] args) throws FileNotFoundException {
         long startTime = System.currentTimeMillis();
-        
         String file = "input/day1.txt";
-        
-        map = new HashMap<>() {{
-            put('o', new String[]{"one"});
-            put('t', new String[]{"two", "three"});
-            put('f', new String[]{"four", "five"});
-            put('s', new String[]{"six", "seven"});
-            put('e', new String[]{"eight"});
-            put('n', new String[]{"nine"});
-        }};
-        
         toNum = new HashMap<>() {{
             put("one", 1);
             put("two", 2);
@@ -44,20 +29,17 @@ public class Day1 {
         while (in.hasNext()) {
             StringBuilder curr = new StringBuilder();
             String line = in.nextLine();
-            int len = line.length();
             int l = 0;
-            int r = len - 1;
-            while (l < len) {
-                if (isNumber(line, l, curr, checkLetters)) {
+            int r = line.length() - 1;
+            while (l < line.length()) {
+                if (isNumber(line, l++, curr, checkLetters)) {
                     break;
                 }
-                l++;
             }
             while (r >= 0) {
-                if (isNumber(line, r, curr, checkLetters)) {
+                if (isNumber(line, r--, curr, checkLetters)) {
                     break;
                 }
-                r--;
             }
             sum += Integer.parseInt(curr.toString());
         }
@@ -70,9 +52,9 @@ public class Day1 {
             curr.append(ch);
             return true;
         }
-        if (checkLetters && map.containsKey(ch)) {
-            for (String s : map.get(ch)) {
-                if (idx + s.length() <= line.length() && s.equals(line.substring(idx, idx + s.length()))) {
+        if (checkLetters) {
+            for (String s : toNum.keySet()) {
+                if (line.substring(idx).startsWith(s)) {
                     curr.append(toNum.get(s));
                     return true;
                 }

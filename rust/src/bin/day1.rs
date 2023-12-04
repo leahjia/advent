@@ -15,13 +15,10 @@ fn part2(input: &str) -> u32 {
     let map = HashMap::from([("one", 1), ("two", 2), ("three", 3), ("four", 4), ("five", 5), ("six", 6), ("seven", 7), ("eight", 8), ("nine", 9)]);
 
     input.lines().filter_map(|line| {
-        let first = (0..line.len()).find_map(|idx| {
-            map.iter().find(|&(key, _)| line[idx..].starts_with(key)).map(|(_, &val)| val).or_else(|| line[idx..].chars().next().and_then(|c| c.to_digit(10)))
-        }).unwrap();
-        let last = (0..line.len()).rev().find_map(|idx| {
-            map.iter().find(|&(key, _)| line[idx..].starts_with(key)).map(|(_, &val)| val).or_else(|| line[idx..].chars().next().and_then(|c| c.to_digit(10)))
-        }).unwrap();
-        Some(first * 10 + last)
+        let matches: Vec<u32> = line.char_indices().filter_map(|(idx, ch)| { 
+            map.iter().find(|&(key, _)| line[idx..].starts_with(key)).map(|(_, &val)| val).or_else(|| ch.to_digit(10))
+        }).collect();
+        matches.first().and_then(|&first| matches.last().map(|&last| first * 10 + last))
     }).sum()
 }
 

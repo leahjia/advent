@@ -1,4 +1,5 @@
 import java.io.*;
+import java.math.BigInteger;
 import java.util.*;
 
 public class Day8 {
@@ -27,9 +28,10 @@ public class Day8 {
     }
     
     static Queue<String> startingPoints = new LinkedList<>();
+    static Map<String, BigInteger> steps = new HashMap<>();
     
-    private static long part2() {
-        long step = 0;
+    private static BigInteger part2() {
+        BigInteger step = BigInteger.ZERO;
         int idx = 0;
         while (!startingPoints.isEmpty()) {
             int iter = startingPoints.size();
@@ -39,22 +41,45 @@ public class Day8 {
                 String curr = startingPoints.poll();
                 // System.out.println("curr " + curr);
                 if (curr.endsWith("Z")) {
-                    count++;
+                    steps.put(curr, step);
+                } else {
+                    String next = map.get(curr)[dr == 'R' ? 1 : 0];
+                    startingPoints.offer(next);
                 }
-                String next = map.get(curr)[dr == 'R' ? 1 : 0];
-                startingPoints.offer(next);
             }
-            if (count == iter) {
-                System.out.println("what? " + startingPoints.size());
-                return step;
-            }
-            step++;
-            System.out.println(step);
+            step = step.add(BigInteger.ONE);
+            // System.out.println(step);
             if (idx == direct.length) {
                 idx = 0;
             }
         }
-        return step;
+        System.out.println(steps);
+        //        BigInteger res = BigInteger.ONE;
+        //        for (BigInteger val : steps.values()) {
+        //            res = res.multiply(val);
+        //        }
+        return findLCM(); // [, 18953436893326990687332607]
+    }
+    
+    private static BigInteger gcd(BigInteger a, BigInteger b) {
+        while (!b.equals(BigInteger.ZERO)) {
+            BigInteger temp = new BigInteger(b.toString());
+            b = a.mod(b);
+            a = temp;
+        }
+        return a;
+    }
+    
+    private static BigInteger lcm(BigInteger a, BigInteger b) {
+        return a.multiply(b.divide(gcd(a, b)));
+    }
+    
+    private static BigInteger findLCM() {
+        BigInteger res = BigInteger.ONE;
+        for (BigInteger val : steps.values()) {
+            res = lcm(res, val);
+        }
+        return res;
     }
     
     static Map<String, String[]> map = new HashMap<>();

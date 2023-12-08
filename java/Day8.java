@@ -1,25 +1,26 @@
 import java.io.*;
-import java.math.BigInteger;
 import java.util.*;
 
 public class Day8 {
+    static Map<String, String[]> paths = new HashMap<>();
+    static char[] direct;
+    
     public static void main(String[] args) throws FileNotFoundException {
         long startTime = System.currentTimeMillis();
         Scanner in = new Scanner(new FileReader("input/day8.txt"));
-        processInput(in);
-        //System.out.println("Part I  ??: " + part1());
-        System.out.println("Part II ??: " + part2());
+        Queue<String> startingPoints = processInput(in);
+        System.out.println("Part I           17141:" + singleReach());
+        System.out.println("Part II 10818234074807:" + bfs(startingPoints));
         System.out.println("Execution time: " + (System.currentTimeMillis() - startTime) + "ms");
     }
     
-    private static long part1() {
+    private static long singleReach() {
         int step = 0;
         String curr = "AAA";
         int i = 0;
         while (!curr.equals("ZZZ")) {
             step++;
-            char dr = direct[i++];
-            curr = map.get(curr)[dr == 'R' ? 1 : 0];
+            curr = paths.get(curr)[direct[i++] == 'R' ? 1 : 0];
             if (i == direct.length) {
                 i = 0;
             }
@@ -27,65 +28,44 @@ public class Day8 {
         return step;
     }
     
-    static Queue<String> startingPoints = new LinkedList<>();
-    static Map<String, BigInteger> steps = new HashMap<>();
-    
-    private static BigInteger part2() {
-        BigInteger step = BigInteger.ZERO;
+    private static long bfs(Queue<String> startingPoints) {
+        long steps = 1;
+        long currStep = 0;
         int idx = 0;
         while (!startingPoints.isEmpty()) {
             int iter = startingPoints.size();
             char dr = direct[idx++];
-            int count = 0;
             for (int i = 0; i < iter; i++) {
                 String curr = startingPoints.poll();
-                // System.out.println("curr " + curr);
                 if (curr.endsWith("Z")) {
-                    steps.put(curr, step);
+                    steps = lcm(steps, currStep);
                 } else {
-                    String next = map.get(curr)[dr == 'R' ? 1 : 0];
-                    startingPoints.offer(next);
+                    startingPoints.offer(paths.get(curr)[dr == 'R' ? 1 : 0]);
                 }
             }
-            step = step.add(BigInteger.ONE);
-            // System.out.println(step);
+            currStep++;
             if (idx == direct.length) {
                 idx = 0;
             }
         }
-        System.out.println(steps);
-        //        BigInteger res = BigInteger.ONE;
-        //        for (BigInteger val : steps.values()) {
-        //            res = res.multiply(val);
-        //        }
-        return findLCM(); // [, 18953436893326990687332607]
+        return steps;
     }
     
-    private static BigInteger gcd(BigInteger a, BigInteger b) {
-        while (!b.equals(BigInteger.ZERO)) {
-            BigInteger temp = new BigInteger(b.toString());
-            b = a.mod(b);
+    private static long lcm(long a, long b) {
+        return a * b / gcd(a, b);
+    }
+    
+    private static long gcd(long a, long b) {
+        while (b != 0) {
+            long temp = b;
+            b = a % b;
             a = temp;
         }
         return a;
     }
     
-    private static BigInteger lcm(BigInteger a, BigInteger b) {
-        return a.multiply(b.divide(gcd(a, b)));
-    }
-    
-    private static BigInteger findLCM() {
-        BigInteger res = BigInteger.ONE;
-        for (BigInteger val : steps.values()) {
-            res = lcm(res, val);
-        }
-        return res;
-    }
-    
-    static Map<String, String[]> map = new HashMap<>();
-    static char[] direct;
-    
-    private static void processInput(Scanner in) {
+    private static Queue<String> processInput(Scanner in) {
+        Queue<String> startingPoints = new LinkedList<>();
         direct = in.nextLine().toCharArray();
         in.nextLine();
         while (in.hasNextLine()) {
@@ -95,8 +75,9 @@ public class Day8 {
                 startingPoints.offer(key);
             }
             String[] pair = line[1].substring(1, line[1].length() - 1).split(", ");
-            map.put(key, pair);
+            paths.put(key, pair);
         }
+        return startingPoints;
     }
     
 }

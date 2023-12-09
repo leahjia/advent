@@ -2,7 +2,7 @@ import java.io.*;
 import java.util.*;
 
 public class Day8 {
-    static Map<String, String[]> paths = new HashMap<>();
+    static Map<String, String[]> paths;
     static char[] direct;
     
     public static void main(String[] args) throws FileNotFoundException {
@@ -14,16 +14,14 @@ public class Day8 {
         System.out.println("Execution time: " + (System.currentTimeMillis() - startTime) + "ms");
     }
     
-    private static long singleReach() {
-        int step = 0;
+    private static int singleReach() {
         String curr = "AAA";
+        int step = 0;
         int i = 0;
         while (!curr.equals("ZZZ")) {
             step++;
-            curr = paths.get(curr)[direct[i++] == 'R' ? 1 : 0];
-            if (i == direct.length) {
-                i = 0;
-            }
+            int next = direct[i++ % direct.length] == 'R' ? 1 : 0;
+            curr = paths.get(curr)[next];
         }
         return step;
     }
@@ -34,19 +32,16 @@ public class Day8 {
         int idx = 0;
         while (!startingPoints.isEmpty()) {
             int iter = startingPoints.size();
-            char dr = direct[idx++];
-            for (int i = 0; i < iter; i++) {
+            int next = direct[idx++ % direct.length] == 'R' ? 1 : 0;
+            while (iter-- > 0) {
                 String curr = startingPoints.poll();
                 if (curr.endsWith("Z")) {
                     steps = lcm(steps, currStep);
                 } else {
-                    startingPoints.offer(paths.get(curr)[dr == 'R' ? 1 : 0]);
+                    startingPoints.offer(paths.get(curr)[next]);
                 }
             }
             currStep++;
-            if (idx == direct.length) {
-                idx = 0;
-            }
         }
         return steps;
     }
@@ -65,16 +60,17 @@ public class Day8 {
     }
     
     private static Queue<String> processInput(Scanner in) {
-        Queue<String> startingPoints = new LinkedList<>();
         direct = in.nextLine().toCharArray();
+        paths = new HashMap<>();
+        Queue<String> startingPoints = new LinkedList<>();
         in.nextLine();
         while (in.hasNextLine()) {
             String[] line = in.nextLine().split(" = ");
             String key = line[0];
+            String[] pair = line[1].substring(1, line[1].length() - 1).split(", ");
             if (key.endsWith("A")) {
                 startingPoints.offer(key);
             }
-            String[] pair = line[1].substring(1, line[1].length() - 1).split(", ");
             paths.put(key, pair);
         }
         return startingPoints;

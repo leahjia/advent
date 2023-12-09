@@ -4,7 +4,7 @@ import java.util.*;
 public class Day5 {
     static String[] mapNames;
     static long[] seeds;
-    static Map<String, List<long[]>> maps; // <name, <range, diff>>
+    static Map<String, List<long[]>> mappings; // <mapName, [start, end, diff]>
     
     public static void main(String[] args) throws FileNotFoundException {
         long startTime = System.currentTimeMillis();
@@ -18,7 +18,7 @@ public class Day5 {
         long res = Long.MAX_VALUE;
         for (long seed : seeds) {
             for (String mapName : mapNames) {
-                seed = getMapTo(maps.get(mapName), seed);
+                seed = getMapTo(mappings.get(mapName), seed);
             }
             res = Math.min(res, seed);
         }
@@ -40,7 +40,7 @@ public class Day5 {
             mapped.add(new long[]{seeds[i], seeds[i] + seeds[i + 1] - 1});
         }
         for (String mapName : mapNames) {
-            mapped = getMapToRange(maps.get(mapName), mapped);
+            mapped = getMapToRange(mappings.get(mapName), mapped);
         }
         long lowest = Long.MAX_VALUE;
         for (long[] range : mapped) {
@@ -69,11 +69,9 @@ public class Day5 {
     private static void processInput(Scanner in) {
         mapNames = new String[]{"seed-to-soil", "soil-to-fertilizer", "fertilizer-to-water", "water-to-light", "light-to-temperature", "temperature-to-humidity", "humidity-to-location"};
         seeds = Arrays.stream(in.nextLine().split(": ")[1].split(" ")).mapToLong(Long::parseLong).toArray();
-        
-        // <range, diff>
-        maps = new HashMap<>();
+        mappings = new HashMap<>();
         for (String key : mapNames) {
-            maps.put(key, new ArrayList<>());
+            mappings.put(key, new ArrayList<>());
         }
         in.nextLine();
         
@@ -81,7 +79,7 @@ public class Day5 {
         while (in.hasNextLine()) {
             in.nextLine();
             String key = mapNames[mapId];
-            List<long[]> currMap = maps.get(key);
+            List<long[]> ranges = mappings.get(key);
             
             long lowEnd = Long.MAX_VALUE;
             long highEnd = Long.MIN_VALUE;
@@ -94,16 +92,16 @@ public class Day5 {
                 }
                 String[] entry = line.split(" ");
                 long src = Long.parseLong(entry[1]);
-                long end = src + Long.parseLong(entry[2]) - 1;
+                long dst = src + Long.parseLong(entry[2]) - 1; // stupid off by 1
                 long offBy = Long.parseLong(entry[0]) - src;
-                currMap.add(new long[]{src, end, offBy}); // stupid off by 1
+                ranges.add(new long[]{src, dst, offBy});
                 
                 lowEnd = Math.min(lowEnd, src - 1);
-                highEnd = Math.max(highEnd, end + 1);
+                highEnd = Math.max(highEnd, dst + 1);
             }
             // just trying to cover all ranges
-            currMap.add(new long[]{Long.MIN_VALUE, lowEnd, (long) 0});
-            currMap.add(new long[]{highEnd, Long.MAX_VALUE, (long) 0});
+            ranges.add(new long[]{Long.MIN_VALUE, lowEnd, (long) 0});
+            ranges.add(new long[]{highEnd, Long.MAX_VALUE, (long) 0});
         }
     }
 }

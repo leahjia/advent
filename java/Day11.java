@@ -18,19 +18,19 @@ public class Day11 {
     
     private static long sumDist(int scale) {
         expand(scale);
-        List<int[]> list = new ArrayList<>();
+        List<int[]> points = new ArrayList<>();
         for (int key : rowToCol.keySet()) {
             for (int val : rowToCol.get(key)) {
-                list.add(new int[]{key, val});
+                points.add(new int[]{key, val});
             }
         }
-        long res = 0;
-        for (int i = 0; i < list.size(); i++) {
-            for (int j = i + 1; j < list.size(); j++) {
-                res += getDist(list.get(i), list.get(j));
+        long totalDist = 0;
+        for (int i = 0; i < points.size(); i++) {
+            for (int j = i + 1; j < points.size(); j++) {
+                totalDist += getDist(points.get(i), points.get(j));
             }
         }
-        return res;
+        return totalDist;
     }
     
     private static long getDist(int[] a, int[] b) {

@@ -9,23 +9,17 @@ public class Day7 {
         long startTime = System.currentTimeMillis();
         Scanner in = new Scanner(new FileReader("input/day7.txt"));
         processInput(in);
-        System.out.println("Part I  250946742 : " + normalCard());
-        System.out.println("Part II 251824095 : " + wildCard());
+        System.out.println("Part I  250946742 : " + camelCards(false));
+        System.out.println("Part II 251824095 : " + camelCards(true));
         System.out.println("Execution time: " + (System.currentTimeMillis() - startTime) + "ms");
     }
     
-    private static int normalCard() {
-        cards.sort(new CardComparator());
-        int n = 0;
-        int res = 0;
-        while (++n <= cards.size()) {
-            res += n * bets.get(cards.get(n - 1));
+    private static int camelCards(boolean wild) {
+        if (wild) {
+            cards.sort(new WildCardComparator());
+        } else {
+            cards.sort(new CardComparator());
         }
-        return res;
-    }
-    
-    private static int wildCard() {
-        cards.sort(new WildCardComparator());
         int n = 0;
         int res = 0;
         while (++n <= cards.size()) {

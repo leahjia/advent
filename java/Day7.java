@@ -7,14 +7,14 @@ public class Day7 {
     
     public static void main(String[] args) throws FileNotFoundException {
         long startTime = System.currentTimeMillis();
-        Scanner in = new Scanner(new FileReader("input/day7_sample.txt"));
+        Scanner in = new Scanner(new FileReader("input/day7.txt"));
         processInput(in);
-        System.out.println("Part I  250946742 : " + part1());
-        System.out.println("Part II <252163611, not 251595872  : " + part2());
+        System.out.println("Part I  250946742 : " + normalCard());
+        System.out.println("Part II 251824095 : " + wildCard());
         System.out.println("Execution time: " + (System.currentTimeMillis() - startTime) + "ms");
     }
     
-    private static int part1() {
+    private static int normalCard() {
         cards.sort(new CardComparator());
         int n = 0;
         int res = 0;
@@ -24,7 +24,7 @@ public class Day7 {
         return res;
     }
     
-    private static int part2() {
+    private static int wildCard() {
         cards.sort(new WildCardComparator());
         int n = 0;
         int res = 0;
@@ -95,26 +95,26 @@ class CardComparator implements Comparator<String> {
     }
     
     private static String getType(String s) {
-        Map<Character, Integer> count1 = new HashMap<>();
+        Map<Character, Integer> count = new HashMap<>();
         String type = "high";
         boolean checkThree = false;
         int pairs = 0;
         for (char ch : s.toCharArray()) {
-            count1.put(ch, count1.getOrDefault(ch, 0) + 1);
-            if (count1.get(ch) == 5) {
+            count.put(ch, count.getOrDefault(ch, 0) + 1);
+            if (count.get(ch) == 5) {
                 type = "five";
-            } else if (count1.get(ch) == 4) {
+            } else if (count.get(ch) == 4) {
                 checkThree = false;
                 type = "four";
-            } else if (count1.get(ch) == 3) {
+            } else if (count.get(ch) == 3) {
                 checkThree = true;
-            } else if (count1.get(ch) == 2) {
+            } else if (count.get(ch) == 2) {
                 pairs++;
                 type = pairs == 2 ? "two" : "one";
             }
         }
         if (checkThree) {
-            type = count1.size() == 2 ? "full" : "three";
+            type = count.size() == 2 ? "full" : "three";
         }
         return type;
     }
@@ -169,79 +169,64 @@ class WildCardComparator implements Comparator<String> {
     }
     
     private static String getType(String s) {
+        Set<Character> set = new HashSet<>();
+        for (char c : s.toCharArray()) {
+            set.add(c);
+        }
+        if (!set.contains('J')) {
+            return getTypeNoJ(s);
+        }
+        
         Map<Character, Integer> count = new HashMap<>();
         String type = "high";
         int j = 0;
         int maxFreq = 0;
-        int pairs = 0;
         for (char ch : s.toCharArray()) {
             if (ch == 'J') {
                 j++;
             } else {
                 count.put(ch, count.getOrDefault(ch, 0) + 1);
                 maxFreq = Math.max(maxFreq, count.get(ch));
-                if (count.get(ch) == 2) {
-                    pairs++;
-                }
-                if (maxFreq == 5) {
-                    System.out.println(s + " is of type five");
-                    return "five"; // no need to proceed
-                }
             }
         }
-        if (j == 0) {
-            return getTypeNoJ(s);
-        }
-        // if (maxFreq == 4 || j == 4) {
         if (maxFreq + j == 5) {
-            System.out.println(s + " is of type five");
-            // fifth one is wildcard || got 4 wildcards
-            return "five";
-        }
-        if (maxFreq == 3) {
-            System.out.println(s + " is of type four");
-            return "four";
-        }
-        if (maxFreq == 2) {   // at least a pair in there
-            if (pairs == 2) { // fifth card def J
-                System.out.println(s + " is of type full");
-                return "full";
-            }
+            type = "five";
+        } else if (maxFreq + j == 4) {
+            type = "four";
+        } else if (maxFreq + j == 3) {
             if (count.size() == 3) {
-                System.out.println(s + " is of type three");
-                return "three";
+                type = "three";
             } else {
-                System.out.println(s + " is of type four");
-                return "four";
+                type = "full";
             }
+        } else if (maxFreq + j == 2) {
+            type = "one";
         }
-        System.out.println(s + " is of type " + type);
         return type;
     }
     
     private static String getTypeNoJ(String s) {
-        Map<Character, Integer> count1 = new HashMap<>();
+        Map<Character, Integer> count = new HashMap<>();
         String type = "high";
         boolean checkThree = false;
         int pairs = 0;
         for (char ch : s.toCharArray()) {
-            count1.put(ch, count1.getOrDefault(ch, 0) + 1);
-            if (count1.get(ch) == 5) {
+            count.put(ch, count.getOrDefault(ch, 0) + 1);
+            if (count.get(ch) == 5) {
                 type = "five";
-            } else if (count1.get(ch) == 4) {
+            } else if (count.get(ch) == 4) {
                 checkThree = false;
                 type = "four";
-            } else if (count1.get(ch) == 3) {
+            } else if (count.get(ch) == 3) {
                 checkThree = true;
-            } else if (count1.get(ch) == 2) {
+            } else if (count.get(ch) == 2) {
                 pairs++;
                 type = pairs == 2 ? "two" : "one";
             }
         }
         if (checkThree) {
-            type = count1.size() == 2 ? "full" : "three";
+            type = count.size() == 2 ? "full" : "three";
         }
-        System.out.println(s + " is of type " + type);
         return type;
     }
 }

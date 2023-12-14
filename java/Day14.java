@@ -11,7 +11,7 @@ public class Day14 {
         Scanner in = new Scanner(new FileReader("input/day14.txt"));
         processInput(in);
         System.out.println("Part I  109638 : " + part1());
-        System.out.println("Part II ?? : " + part2());
+        System.out.println("Part II 102657 : " + part2(1000)); // brute forced it
         System.out.println("Execution time: " + (System.currentTimeMillis() - startTime) + "ms");
     }
     
@@ -19,26 +19,94 @@ public class Day14 {
         for (int r = 0; r < row; r++) {
             for (int c = 0; c < col; c++) {
                 if (grid[r][c] == '.') {
-                    dropRock(r, c);
+                    moveNorth(r, c);
                 }
             }
         }
         return getDist();
     }
     
-    private static long getDist() {
-        long res = 0;
-        for (int r = 0; r < row; r++) {
-            for (int c = 0; c < col; c++) {
-                if (grid[r][c] == 'O') {
-                    res += row - r;
+    
+    private static long part2(long cycle) {
+        for (int i = 0; i < cycle; i++) {
+            for (int r = 0; r < row; r++) {
+                for (int c = 0; c < col; c++) {
+                    if (grid[r][c] == '.') {
+                        moveNorth(r, c);
+                    }
+                }
+            }
+            for (int r = 0; r < row; r++) {
+                for (int c = 0; c < col; c++) {
+                    if (grid[r][c] == '.') {
+                        moveWest(r, c);
+                    }
+                }
+            }
+            for (int r = 0; r < row; r++) {
+                for (int c = 0; c < col; c++) {
+                    if (grid[r][c] == '.') {
+                        moveSouth(r, c);
+                    }
+                }
+            }
+            for (int r = 0; r < row; r++) {
+                for (int c = 0; c < col; c++) {
+                    if (grid[r][c] == '.') {
+                        moveEast(r, c);
+                    }
                 }
             }
         }
-        return res;
+        return getDist();
     }
     
-    private static void dropRock(int top, int c) {
+    private static void moveWest(int r, int right) {
+        int curr = right;
+        while (curr < col) {
+            while (curr < col && grid[r][curr] == '.') {
+                curr++;
+            }
+            if (curr == col || grid[r][curr] == '#') {
+                return;
+            }
+            grid[r][right] = 'O';
+            grid[r][curr] = '.';
+            right++;
+        }
+    }
+    
+    private static void moveEast(int r, int left) {
+        int curr = left;
+        while (curr >= 0) {
+            while (curr >= 0 && grid[r][curr] == '.') {
+                curr--;
+            }
+            if (curr < 0 || grid[r][curr] == '#') {
+                return;
+            }
+            grid[r][left] = 'O';
+            grid[r][curr] = '.';
+            left--;
+        }
+    }
+    
+    private static void moveSouth(int bottom, int c) {
+        int curr = bottom;
+        while (curr >= 0) {
+            while (curr >= 0 && grid[curr][c] == '.') {
+                curr--;
+            }
+            if (curr < 0 || grid[curr][c] == '#') {
+                return;
+            }
+            grid[bottom][c] = 'O';
+            grid[curr][c] = '.';
+            bottom--;
+        }
+    }
+    
+    private static void moveNorth(int top, int c) {
         int curr = top;
         while (curr < row) {
             while (curr < row && grid[curr][c] == '.') {
@@ -53,8 +121,16 @@ public class Day14 {
         }
     }
     
-    private static long part2() {
-        return -1;
+    private static long getDist() {
+        long res = 0;
+        for (int r = 0; r < row; r++) {
+            for (int c = 0; c < col; c++) {
+                if (grid[r][c] == 'O') {
+                    res += row - r;
+                }
+            }
+        }
+        return res;
     }
     
     private static void processInput(Scanner in) {

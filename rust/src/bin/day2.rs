@@ -31,8 +31,32 @@ fn part1(input: &str, cubes: &HashMap<String, i32>) -> i32 {
     sum
 }
 
-fn part2(input: &str, cubes: &HashMap<String, i32>) -> u32 {
-    1
+fn part2(input: &str) -> i32 {
+    let mut res = 0;
+    for line in input.lines() {
+        let mut map: HashMap<String, i32> = HashMap::new();
+        map.insert("red".to_string(), 0);
+        map.insert("green".to_string(), 0);
+        map.insert("blue".to_string(), 0);
+
+        if let Some(pos) = line.find(":") {
+            let draws = line[pos + 1..].trim().split(";");
+            for draw in draws {
+                for token in draw.split(", ") {
+                    let parts: Vec<&str> = token.split_whitespace().collect();
+                    if parts.len() == 2 {
+                        if let Ok(ct) = parts[0].parse::<i32>() {
+                            let key = parts[1].to_string();
+                            map.entry(key).and_modify(|e| *e = i32::max(*e, ct));
+                        }
+                    }
+                }
+            }
+        }
+        let sum: i32 = map.values().product();
+        res += sum;
+    }
+    res
 }
 
 fn get_cubes() -> HashMap<String, i32> {
@@ -44,9 +68,9 @@ fn get_cubes() -> HashMap<String, i32> {
 }
 
 fn main() {
-    let cubes = get_cubes();
+    let mut cubes = get_cubes();
     println!("{}{}", "Expect 2879, Result: ", part1(&FILE, &cubes));
-    println!("{}{}", "Expect 65122, Result: ", part2(&FILE, &cubes));
+    println!("{}{}", "Expect 65122, Result: ", part2(&FILE));
 }
 
 #[cfg(test)]
@@ -62,7 +86,7 @@ mod tests {
     #[test]
     fn day2_part2() {
         let cubes = get_cubes();
-        assert_eq!(65122, part2(&FILE, &cubes))
+        assert_eq!(65122, part2(&FILE))
     }
 }
 

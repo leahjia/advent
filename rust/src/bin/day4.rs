@@ -1,4 +1,4 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::{HashSet, HashMap, VecDeque};
 use lazy_static::lazy_static;
 
 lazy_static!(
@@ -6,17 +6,28 @@ lazy_static!(
 );
 
 fn main() {
-    println!("{}{}", "Expect 21821, Result: ", part1(&FILE));
-    println!("{}{}", "Expect 5539496, Result: ", part2(&FILE));
+    let (decks, winning_cards) = parse_input(&FILE);
+    println!("{}{}", "Expect 21821, Result: ", part1(&decks, &winning_cards));
+    println!("{}{}", "Expect 5539496, Result: ", part2(&decks, &winning_cards));
 }
 
-fn part1(input: &str) -> i32 {
+fn parse_input(input: &str) -> (Vec<Vec<i32>>, Vec<HashSet<i32>>) {
+    let mut winning_cards: Vec<HashSet<i32>> = Vec::new();
+    let mut decks: Vec<Vec<i32>> = Vec::new();
+
+    for line in input.lines() {
+        let all_cards: Vec<_> = line.split(": ").nth(1).unwrap().split(" | ").map(|card| card.to_string()).collect();
+        winning_cards.push(all_cards.first().unwrap().split_whitespace().map(|card| card.parse::<i32>().unwrap()).collect());
+        decks.push(all_cards.get(1).unwrap().split_whitespace().map(|card| card.parse::<i32>().unwrap()).collect());
+    }
+    (decks, winning_cards)
+}
+
+fn part1(decks: &Vec<Vec<i32>>, winning_cards: &Vec<HashSet<i32>>) -> i32 {
     let mut res = 0;
-    let (winning_cards, curr_cards) = parse_input(input);
-    let n_cards = winning_cards.len();
-    for i in 0..n_cards {
+    for i in 0..decks.len() {
         let mut ct = 0;
-        for card in &curr_cards[i] {
+        for card in decks[i].iter() {
             if winning_cards[i].contains(card) {
                 ct *= 2;
                 if ct == 0 {
@@ -29,57 +40,29 @@ fn part1(input: &str) -> i32 {
     res
 }
 
-fn part2(input: &str) -> i32 {
-    let (winning_cards, curr_cards) = parse_input(input);
-    let n_cards = winning_cards.len();
-
+fn part2(decks: &Vec<Vec<i32>>, winning_cards: &Vec<HashSet<i32>>) -> i32 {
     let mut matches = HashMap::new();
-    for i in 0..n_cards {
-        for card in &curr_cards[i] {
+    for i in 0..decks.len() {
+        for card in decks[i].iter() {
             if winning_cards[i].contains(card) {
-                *matches.entry(i + 1).or_insert(0) += 1;
+                matches.insert(i + 1, matches.get(&(i + 1)).unwrap_or(&0) + 1);
             }
         }
     }
 
-    let mut res = n_cards as i32;
-    let mut q = Vec::new();
-    for &key in matches.keys() {
-        q.push(key);
-    }
-    while let Some(curr) = q.pop() {
-        for i in 1..=matches[&curr] {
+    let mut res = decks.len() as i32;
+    let mut q: VecDeque<_> = matches.keys().cloned().collect();
+    while !q.is_empty() {
+        let curr = q.pop_front().unwrap();
+        for i in 1..=*matches.get(&curr).unwrap() {
             if matches.contains_key(&(curr + i)) {
-                q.push(curr + i);
+                q.push_back(curr + i);
             }
             res += 1;
         }
     }
+
     res
-}
-
-fn parse_input(input: &str) -> (Vec<HashSet<i32>>, Vec<Vec<i32>>) {
-    let mut winning_cards: Vec<HashSet<i32>> = Vec::new();
-    let mut curr_cards: Vec<Vec<i32>> = Vec::new();
-
-    for line in input.lines() {
-        let parts: Vec<&str> = line.split(": ").collect();
-        let mut hand_set = HashSet::new();
-        let mut hand_vec = Vec::new();
-
-        let cards: Vec<&str> = parts[1].split(" | ").collect();
-        for num in cards[0].trim().split_whitespace() {
-            hand_set.insert(num.parse().unwrap());
-        }
-        for num in cards[1].trim().split_whitespace() {
-            hand_vec.push(num.parse().unwrap());
-        }
-
-        winning_cards.push(hand_set);
-        curr_cards.push(hand_vec);
-    }
-
-    (winning_cards, curr_cards)
 }
 
 #[cfg(test)]
@@ -88,11 +71,13 @@ mod tests {
 
     #[test]
     fn day4_part1() {
-        assert_eq!(21821, part1(&FILE))
+        let (decks, winning_cards) = parse_input(&FILE);
+        assert_eq!(21821, part1(&decks, &winning_cards))
     }
 
     #[test]
     fn day4_part2() {
-        assert_eq!(5539496, part2(&FILE))
+        let (decks, winning_cards) = parse_input(&FILE);
+        assert_eq!(5539496, part2(&decks, &winning_cards))
     }
 }

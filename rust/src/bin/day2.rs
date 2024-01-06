@@ -68,7 +68,7 @@ fn get_cubes() -> HashMap<String, i32> {
 }
 
 fn main() {
-    let mut cubes = get_cubes();
+    let cubes = get_cubes();
     println!("{}{}", "Expect 2879, Result: ", part1(&FILE, &cubes));
     println!("{}{}", "Expect 65122, Result: ", part2(&FILE));
 }
@@ -85,7 +85,6 @@ mod tests {
 
     #[test]
     fn day2_part2() {
-        let cubes = get_cubes();
         assert_eq!(65122, part2(&FILE))
     }
 }

@@ -34,30 +34,21 @@ fn get_map_to(seed: i64, ranges: &Vec<[i64; 3]>) -> i64 {
 }
 
 fn part2(map_names: &[&str], seeds: &[i64], maps: &HashMap<&str, Vec<[i64; 3]>>) -> i64 {
-    let mut mapped: Vec<[i64; 2]> = Vec::new();
-    for i in (0..seeds.len() - 1).step_by(2) {
-        mapped.push([seeds[i], seeds[i] + seeds[i + 1] - 1]);
-    }
+    let mut mapped = seeds.windows(2).step_by(2).map(|w| [w[0], w[0] + w[1] - 1]).collect();
     for name in map_names {
         mapped = get_map_to_range(maps.get(name).unwrap(), &mapped);
     }
-
-    let mut lowest = i64::MAX;
-    for range in mapped {
-        lowest = lowest.min(range[0]);
-    }
-    lowest
+    mapped.iter().map(|range| range[0]).min().unwrap()
 }
 
 fn get_map_to_range(map: &Vec<[i64; 3]>, ranges: &Vec<[i64; 2]>) -> Vec<[i64; 2]> {
     let mut mapped = Vec::new();
-    for range in ranges {
-        for map_range in map {
-            let off_by = map_range[2];
-            if has_overlap(*range, *map_range) {
-                mapped.push([range[0].max(map_range[0]) + off_by, range[1].min(map_range[1]) + off_by]);
-            }
-        }
+    for range in ranges.iter() {
+        mapped.extend(
+            map.iter()
+            .filter(|&map_range| has_overlap(*range, *map_range))
+            .map(|map_range| [range[0].max(map_range[0]) + map_range[2], range[1].min(map_range[1]) + map_range[2]])
+        );
     }
     mapped
 }
@@ -68,18 +59,14 @@ fn has_overlap(range1: [i64; 2], range2: [i64; 3]) -> bool {
 
 fn parse_input(input: &str) -> (Vec<&str>, Vec<i64>, HashMap<&str, Vec<[i64; 3]>>) {
     let map_names = ["seed-to-soil", "soil-to-fertilizer", "fertilizer-to-water", "water-to-light", "light-to-temperature", "temperature-to-humidity", "humidity-to-location"];
-
     let mut lines = input.lines();
     let seeds = lines.next().unwrap().split(": ").nth(1).unwrap().split_whitespace().map(|s| s.parse::<i64>().unwrap()).collect();
-    let mut maps: HashMap<&str, Vec<[i64; 3]>> = HashMap::new();
-    for key in map_names {
-        maps.insert(key, Vec::new());
-    }
+    
+    let mut maps = map_names.iter().map(|&key| (key, Vec::new())).collect::<HashMap<&str, Vec<[i64; 3]>>>();
 
     lines.next();
     let mut map_id = 0;
     while let Some(_) = lines.next() {
-        // lines.next();
         let key = map_names[map_id];
         let ranges = maps.get_mut(key).unwrap();
 
@@ -91,9 +78,8 @@ fn parse_input(input: &str) -> (Vec<&str>, Vec<i64>, HashMap<&str, Vec<[i64; 3]>
                 map_id += 1;
                 break;
             }
-            let entry: Vec<i64> = line.split_whitespace().map(|s| s.parse::<i64>().unwrap()).collect();
-            let src = entry[1];
-            let dst = src + entry[2] - 1;
+            let entry = line.split_whitespace().map(|s| s.parse::<i64>().unwrap()).collect::<Vec<i64>>();
+            let (src, dst) = (entry[1], entry[1] + entry[2] - 1);
             let off_by = entry[0] - src;
             ranges.push([src, dst, off_by]);
 
